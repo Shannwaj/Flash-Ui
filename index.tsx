@@ -46,6 +46,7 @@ function App() {
   const [isThinkingEnabled, setIsThinkingEnabled] = useState<boolean>(false);
   const [isSearchEnabled, setIsSearchEnabled] = useState<boolean>(false);
   const [isLowLatency, setIsLowLatency] = useState<boolean>(false);
+  const [isLiveEditEnabled, setIsLiveEditEnabled] = useState<boolean>(() => localStorage.getItem('live-edit-enabled') === 'true');
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isLiveActive, setIsLiveActive] = useState<boolean>(false);
 
@@ -376,6 +377,13 @@ function App() {
     performGeneration(sessionId, artifactId, session.prompt);
   };
 
+  const handleUpdateArtifact = (artifactId: string, updates: Partial<Artifact>) => {
+    setSessions(prev => prev.map(s => ({
+      ...s,
+      artifacts: s.artifacts.map(a => a.id === artifactId ? { ...a, ...updates } : a)
+    })));
+  };
+
   const handleTranscribe = async () => {
     setIsLoading(true);
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -428,6 +436,22 @@ function App() {
         </div>
 
         <SideDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} title="Omni Settings">
+            <div className="drawer-section">
+                <h3>Live Edit Mode</h3>
+                <p className="section-desc">Instantly modify and preview UI code changes.</p>
+                <div className="setting-item">
+                    <span>Enable UI Live Editing</span>
+                    <button 
+                        className={`toggle-switch ${isLiveEditEnabled ? 'active' : ''}`} 
+                        onClick={() => {
+                            const newState = !isLiveEditEnabled;
+                            setIsLiveEditEnabled(newState);
+                            localStorage.setItem('live-edit-enabled', String(newState));
+                        }} 
+                    />
+                </div>
+            </div>
+
             <div className="drawer-section">
                 <h3>Collaboration</h3>
                 <p className="section-desc">Sync sessions across tabs and see active collaborators.</p>
@@ -503,6 +527,8 @@ function App() {
                                     isFocused={focusedArtifactIndex === aIdx} 
                                     onClick={() => setFocusedArtifactIndex(aIdx)} 
                                     onRetry={() => handleRetry(session.id, a.id)}
+                                    isLiveEditEnabled={isLiveEditEnabled}
+                                    onUpdate={handleUpdateArtifact}
                                 />
                             ))}
                         </div>
