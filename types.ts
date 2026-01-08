@@ -1,13 +1,27 @@
+
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
 
+export type ArtifactType = 'ui' | 'image' | 'video' | 'chat' | 'vision' | 'audio' | 'transcription';
+
+export interface GroundingChunk {
+  web?: { uri: string; title: string };
+  maps?: { uri: string; title: string };
+}
+
 export interface Artifact {
   id: string;
   styleName: string;
   html: string;
-  status: 'streaming' | 'complete' | 'error';
+  imageUrl?: string;
+  videoUrl?: string;
+  audioUrl?: string;
+  text?: string;
+  type: ArtifactType;
+  status: 'streaming' | 'complete' | 'error' | 'thinking';
+  groundingLinks?: GroundingChunk[];
 }
 
 export interface Session {
@@ -18,4 +32,3 @@ export interface Session {
 }
 
 export interface ComponentVariation { name: string; html: string; }
-export interface LayoutOption { name: string; css: string; previewHtml: string; }

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
 */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 
 interface CodePreviewProps {
     code: string;
@@ -28,9 +28,20 @@ const highlightCode = (code: string) => {
 
 const CodePreview: React.FC<CodePreviewProps> = ({ code }) => {
     const lines = useMemo(() => code.trim().split('\n'), [code]);
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    // Auto-scroll to the bottom whenever code changes
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTo({
+                top: scrollRef.current.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+    }, [code]);
 
     return (
-        <div className="code-preview-container">
+        <div className="code-preview-container" ref={scrollRef}>
             <div className="line-numbers">
                 {lines.map((_, i) => (
                     <div key={i} className="line-number">{i + 1}</div>
